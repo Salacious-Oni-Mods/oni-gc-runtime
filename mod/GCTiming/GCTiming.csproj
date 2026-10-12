@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>GCTiming</RootNamespace>
+    <AssemblyName>GCTiming</AssemblyName>
+    <Version>0.10.2</Version>
+    <!-- On here (Directory.Build.props turns it off) so <Version> reaches the assembly, where the
+         "loaded." line and the watermark tooltip read it. Keep mod_info.yaml's version the same. -->
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="GCTimingMod.cs" />
+    <Compile Include="GcRuntimeInfo.cs" />
+    <Compile Include="CollectPolicy.cs" />
+    <Compile Include="FocusCollector.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="Watermark.cs" />
+    <Compile Include="Log.cs" />
+    <!-- LocText derives from TextMeshProUGUI, so the watermark's label type needs it resolvable.
+         Reference only; nothing is copied next to the mod (Directory.Build.props). -->
+    <Reference Include="Unity.TextMeshPro"><HintPath>$(ModLibDir)Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UI"><HintPath>$(ModLibDir)UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
+    <!-- config.json is read with the Newtonsoft the game already ships in Managed. Reference
+         only, nothing copied: the mod adds no assembly to the install. -->
+    <Reference Include="Newtonsoft.Json"><HintPath>$(ModLibDir)Newtonsoft.Json.dll</HintPath><Private>false</Private></Reference>
+    <None Include="mod.yaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="mod_info.yaml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

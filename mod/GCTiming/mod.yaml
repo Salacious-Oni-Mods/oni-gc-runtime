@@ -1,0 +1,3 @@
+title: "GC Timing"
+description: "Moves a garbage collection to a moment you cannot see: when the game window loses focus, or when you pause, and only if enough has been allocated since the last collection to be worth it. Collecting at a pause also needs a collection short enough to spend there, which the mod works out by watching what the game's own collections cost, so on an unmodified game runtime it never does. The game keeps Unity's own automatic GC mode, so nothing is held back and nothing has to be restored. It also reports which Mono GC runtime is loaded, in Player.log and on the build watermark, so you can see whether the parallel-marking runtime install took effect. No gameplay changes."
+staticID: "GCTiming"

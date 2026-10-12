@@ -1,0 +1,9 @@
+# Strings build-runtime.sh requires in the built DLL (tools/check-strings.py). "w:" = UTF-16LE.
+# PARALLEL_MARK itself (mono.patch; this set also defines USE_MARK_BITS, which leaves no string):
+Single marker thread, turning off parallel marking
+# the GC_MARKERS knob and the marker thread name (bdwgc.patch, win32_threads.c):
+GC_MARKERS
+w:BDWGC marker
+# the version export (mono.patch, boehm-gc.c), and its string (see build-runtime.sh):
+oni_gc_version
+-b3-markbits+

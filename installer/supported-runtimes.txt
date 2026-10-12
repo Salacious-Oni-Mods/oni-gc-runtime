@@ -1,0 +1,4 @@
+# Runtimes this release replaces, one per line: the SHA-256 of the game's own
+# MonoBleedingEdge\EmbedRuntime\mono-2.0-bdwgc.dll, then what it is. The installer refuses any
+# runtime not listed here.
+ea73d85a6ee0d776ebed64d101e6e8b20f132b658d969c137454725d94561092 Unity 6000.3.5f2 Mono runtime (game build 744825)

@@ -1,0 +1,21 @@
+# Unity's Mono source is checked out OUTSIDE this repo (tools/fetch-mono.sh, into
+# <ONI_GC_BUILD>\mono). Kept ignored in case someone clones it here anyway.
+/external/
+
+# Build output, including any runtime DLL built from Unity's source. A built runtime is not
+# committed here.
+/build/
+/out/
+bin/
+obj/
+.vs/
+*.user
+
+# Python bytecode from tools/
+__pycache__/
+
+# Run archives
+/runs/
+
+# Machine-local settings for tools/*.sh
+/tools/local.env

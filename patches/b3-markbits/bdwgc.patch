@@ -1,0 +1,70 @@
+diff --git a/mark.c b/mark.c
+index 7366ed8..5daacd7 100644
+--- a/mark.c
++++ b/mark.c
+@@ -390,6 +390,21 @@ static void alloc_mark_stack(size_t);
+                     alloc_mark_stack(2*GC_mark_stack_size);
+                   }
+                   if (GC_mark_state == MS_ROOTS_PUSHED) {
++                    /* Patch: Unity's mark-stack-empty hook (Mono marks       */
++                    /* ConditionalWeakTable values with it) was only called  */
++                    /* in the serial branch below, so a parallel build freed */
++                    /* live ephemeron values.  Call it here too.  If it       */
++                    /* pushed anything, stay in MS_ROOTS_PUSHED so the next  */
++                    /* call marks that in parallel and asks the hook again:  */
++                    /* the same fixpoint as the serial branch.               */
++                    GC_mark_stack_empty_proc mark_stack_empty_proc =
++                                                GC_get_mark_stack_empty();
++                    if (mark_stack_empty_proc) {
++                      GC_mark_stack_top = mark_stack_empty_proc(
++                                GC_mark_stack_top, GC_mark_stack_limit);
++                      if ((word)GC_mark_stack_top >= (word)GC_mark_stack)
++                        break;
++                    }
+                     GC_mark_state = MS_NONE;
+                     return(TRUE);
+                   }
+diff --git a/win32_threads.c b/win32_threads.c
+index 0e0c97a..811bfb9 100644
+--- a/win32_threads.c
++++ b/win32_threads.c
+@@ -1909,6 +1909,18 @@ GC_INNER void GC_get_next_stack(char *start, char *limit,
+     word my_mark_no = 0;
+ 
+     if ((word)id == (word)-1) return 0; /* to make compiler happy */
++#   if !defined(MSWINCE) && !defined(GC_PTHREADS_PARAMARK)
++      /* Patch: name the thread, so a profiler or a thread listing     */
++      /* can count the markers.  SetThreadDescription is Windows 10    */
++      /* 1607+, so it is looked up rather than imported.               */
++      {
++        typedef HRESULT (WINAPI *set_desc_t)(HANDLE, PCWSTR);
++        HMODULE k32 = GetModuleHandleW(L"kernel32.dll");
++        set_desc_t set_desc = k32 ? (set_desc_t)(word)GetProcAddress(k32,
++                                        "SetThreadDescription") : NULL;
++        if (set_desc) (void)set_desc(GetCurrentThread(), L"BDWGC marker");
++      }
++#   endif
+     marker_sp[(word)id] = GC_approx_sp();
+ #   ifdef IA64
+       marker_bsp[(word)id] = GC_save_regs_in_stack();
+@@ -2651,7 +2663,19 @@ GC_INNER void GC_thr_init(void)
+ 
+ # if defined(PARALLEL_MARK)
+     {
+-      char * markers_string = GETENV("GC_MARKERS");
++#     if defined(NO_GETENV) && !defined(MSWINCE)
++        /* Patch: NO_GETENV stubs GETENV, which also disabled          */
++        /* GC_MARKERS.  Read it directly, so the marker count can be   */
++        /* measured without a rebuild.  Unset means the default below. */
++        char markers_buf[16];
++        DWORD markers_len = GetEnvironmentVariableA("GC_MARKERS",
++                                        markers_buf, sizeof(markers_buf));
++        char * markers_string = markers_len > 0
++                                && markers_len < sizeof(markers_buf)
++                                ? markers_buf : NULL;
++#     else
++        char * markers_string = GETENV("GC_MARKERS");
++#     endif
+       int markers;
+ 
+       if (markers_string != NULL) {

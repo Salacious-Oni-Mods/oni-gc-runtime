@@ -1,0 +1,56 @@
+oni-gc-runtime
+Copyright (c) 2026 Salacious
+
+The code in this repository (the GC Timing mod, the installer, the build scripts and the
+patches in patches/) is licensed under the MIT License; see LICENSE.
+
+Oxygen Not Included is developed and published by Klei Entertainment. Unity and Mono are
+developed by Unity Technologies. This project is not affiliated with or endorsed by either.
+
+This repository contains no file of the game or of Unity: no game binaries, assets or data,
+and no copy of the Mono runtime or its source. The runtime is built from Unity's public source,
+fetched by tools/fetch-mono.sh at these commits:
+
+    Unity-Technologies/mono    ea2b094073e83cb1d047f0235569901096bdcd9e (Unity 6000.3)
+    Unity-Technologies/bdwgc   1113fefc4ba0e895767ac780d84e9e456fd624db (BDWGC 7.7.0)
+    libatomic_ops              7e44a3b (submodule of bdwgc)
+    dotnet/corefx (Unity fork) 5b4edb9 (submodule of mono; native brotli sources)
+
+with the patch set in patches/b3-markbits applied.
+
+
+THE GARBAGE COLLECTOR IN THE RELEASED RUNTIME IS MODIFIED
+---------------------------------------------------------
+
+The mono-2.0-bdwgc.dll published with releases of this project is not Unity's runtime. It
+is built from the sources above with these changes:
+
+  - BDWGC is compiled with PARALLEL_MARK, so marking runs on several threads. BDWGC picks the
+    number of marker threads from the processor count; the GC_MARKERS environment variable
+    overrides it, read even though the build sets NO_GETENV. The threads are named
+    "BDWGC marker".
+  - GC_mark_some's parallel branch calls Unity's mark-stack-empty hook, which the unmodified
+    source calls only on the serial path. Unity's ephemeron (ConditionalWeakTable) support
+    depends on that hook.
+  - BDWGC is compiled with USE_MARK_BITS, one mark bit per granule instead of one mark byte.
+  - The runtime exports oni_gc_version(), which returns the version of this patch set.
+
+The exact changes are patches/b3-markbits/bdwgc.patch and patches/b3-markbits/mono.patch.
+
+
+Notices of the code compiled into the released runtime
+------------------------------------------------------
+
+The full texts are in licenses/ and are shipped in every release package.
+
+  Mono runtime (MIT; the MIT side of Mono's MIT/GPL dual licence)
+      licenses/mono-LICENSE.txt, licenses/mono-Third-Party-Notices.md
+  BSD- and zlib-style files Mono compiles into the runtime (bsearch, glob, FreeBSD ELF/DWARF
+  headers, memcheck.h, minizip)
+      licenses/mono-runtime-file-notices.txt
+  BDWGC, the Boehm-Demers-Weiser garbage collector (permissive; modified, see above)
+      licenses/bdwgc-COPYRIGHT.txt
+  libatomic_ops (MIT-style; the GPL parts of that package are not linked into the collector)
+      licenses/libatomic_ops-LICENSING.txt
+  Brotli, from .NET corefx (MIT; compress_fragment.c also carries a BSD 3-clause notice)
+      licenses/corefx-LICENSE.txt, licenses/corefx-THIRD-PARTY-NOTICES.txt

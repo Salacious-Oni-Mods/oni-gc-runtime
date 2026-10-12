@@ -1,0 +1,37 @@
+<Project>
+
+  <!-- Shared settings for every managed project here: net48 (the game's Harmony is built for
+       it), and the game's own assemblies referenced from ModLibDir, never copied next to the mod.
+       ModLibDir defaults to a lib/ folder beside this repo; point it at the game's Managed folder
+       with -p:ModLibDir=<game>\OxygenNotIncluded_Data\Managed\ (trailing slash included). -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DebugType>none</DebugType>
+    <Deterministic>true</Deterministic>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <NoWarn>$(NoWarn);CS1701;CS1702;MSB3277</NoWarn>
+    <ModLibDir Condition="'$(ModLibDir)' == ''">$(MSBuildThisFileDirectory)..\lib\</ModLibDir>
+  </PropertyGroup>
+
+  <Target Name="OniGcCheckLib" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(ModLibDir)Assembly-CSharp.dll')"
+           Text="$(ModLibDir) has no game assemblies. Copy the game's OxygenNotIncluded_Data\Managed\*.dll there, or build with -p:ModLibDir=&lt;that folder&gt;\" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony"><HintPath>$(ModLibDir)0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(ModLibDir)Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Assembly-CSharp-firstpass"><HintPath>$(ModLibDir)Assembly-CSharp-firstpass.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(ModLibDir)UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ModLibDir)UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+</Project>

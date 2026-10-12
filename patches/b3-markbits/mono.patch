@@ -1,0 +1,41 @@
+diff --git a/mono/metadata/boehm-gc.c b/mono/metadata/boehm-gc.c
+index 71222459..4c3790dc 100644
+--- a/mono/metadata/boehm-gc.c
++++ b/mono/metadata/boehm-gc.c
+@@ -2276,6 +2276,23 @@ mono_gc_strong_handle_foreach(GFunc func, gpointer user_data)
+ 	unlock_handles(handles);
+ }
+ 
++/*
++ * Names this runtime as a modified build. The patch set that adds this (patches/<set>
++ * in the oni-gc-runtime repo) is built by tools/build-runtime.sh, which writes oni-gc-version.h
++ * with "<VERSION>-<set>+<commit>", and "*" appended when that tree was dirty. The stock runtime
++ * has no such export, which is how a reader tells the two apart.
++ */
++#include "oni-gc-version.h"
++
++MONO_API const char *
++oni_gc_version (void);
++
++const char *
++oni_gc_version (void)
++{
++	return ONI_GC_VERSION;
++}
++
+ #else
+ 
+ MONO_EMPTY_SOURCE_FILE (boehm_gc);
+diff --git a/msvc/libgc.vcxproj b/msvc/libgc.vcxproj
+index 9ed9728d..fd2e7c08 100644
+--- a/msvc/libgc.vcxproj
++++ b/msvc/libgc.vcxproj
+@@ -170,7 +170,7 @@
+     </Midl>
+     <ClCompile>
+       <AdditionalIncludeDirectories>$(MONO_LIBGC_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+-      <PreprocessorDefinitions>NDEBUG;__x86_64__;WIN64;_WIN64;WIN32;_WIN32;__WIN32__;_WINDOWS;WINDOWS;HOST_WIN32;TARGET_WIN32;_CRT_SECURE_NO_DEPRECATE;__STDC__;PACKAGE_NAME="libgc-mono";PACKAGE_TARNAME="libgc-mono";PACKAGE_VERSION="6.6";PACKAGE_STRING="libgc-mono 6.6";PACKAGE_BUGREPORT="Hans_Boehm%40hp.com";GC_WIN32_THREADS=1;NO_GETENV=1;GC_INSIDE_DLL=1;GC_NOT_DLL=1;STDC_HEADERS=1;HAVE_SYS_TYPES_H=1;HAVE_SYS_STAT_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;HAVE_MEMORY_H=1;HAVE_STRINGS_H=1;HAVE_INTTYPES_H=1;HAVE_STDINT_H=1;HAVE_UNISTD_H=1;SILENT=1;NO_SIGNALS=1;NO_EXECUTE_PERMISSION=1;JAVA_FINALIZATION=1;GC_GCJ_SUPPORT=1;ATOMIC_UNCOLLECTABLE=1;_IN_LIBGC=1;WINVER=0x0601;_WIN32_WINNT=0x0601;_WIN32_IE=0x0501;WIN32_THREADS;FD_SETSIZE=1024;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions>NDEBUG;__x86_64__;WIN64;_WIN64;WIN32;_WIN32;__WIN32__;_WINDOWS;WINDOWS;HOST_WIN32;TARGET_WIN32;_CRT_SECURE_NO_DEPRECATE;__STDC__;PACKAGE_NAME="libgc-mono";PACKAGE_TARNAME="libgc-mono";PACKAGE_VERSION="6.6";PACKAGE_STRING="libgc-mono 6.6";PACKAGE_BUGREPORT="Hans_Boehm%40hp.com";GC_WIN32_THREADS=1;PARALLEL_MARK=1;USE_MARK_BITS=1;NO_GETENV=1;GC_INSIDE_DLL=1;GC_NOT_DLL=1;STDC_HEADERS=1;HAVE_SYS_TYPES_H=1;HAVE_SYS_STAT_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;HAVE_MEMORY_H=1;HAVE_STRINGS_H=1;HAVE_INTTYPES_H=1;HAVE_STDINT_H=1;HAVE_UNISTD_H=1;SILENT=1;NO_SIGNALS=1;NO_EXECUTE_PERMISSION=1;JAVA_FINALIZATION=1;GC_GCJ_SUPPORT=1;ATOMIC_UNCOLLECTABLE=1;_IN_LIBGC=1;WINVER=0x0601;_WIN32_WINNT=0x0601;_WIN32_IE=0x0501;WIN32_THREADS;FD_SETSIZE=1024;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+       <WarningLevel>Level3</WarningLevel>
+       <IntrinsicFunctions>true</IntrinsicFunctions>
